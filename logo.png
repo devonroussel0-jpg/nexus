@@ -1,0 +1,1 @@
+COPY logo.png /app/public/images/logo.png
