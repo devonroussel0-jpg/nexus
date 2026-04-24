@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus - Streaming</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#0d0d0d;color:#fff;font-family:'Segoe UI',sans-serif;}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:#1a1a1a;}
+  ::-webkit-scrollbar-thumb{background:#6C63FF;border-radius:3px;}
+
+  /* NAV */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:#0d0d0dcc;backdrop-filter:blur(10px);position:sticky;top:0;z-index:100;border-bottom:1px solid #222;}
+  .logo{display:flex;align-items:center;gap:10px;cursor:pointer;}
+  .logo-icon{width:38px;height:38px;background:linear-gradient(135deg,#6C63FF,#48C6EF);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;}
+  .logo-text{font-size:22px;font-weight:700;letter-spacing:3px;}
+  .nav-links{display:flex;gap:28px;}
+  .nav-links a{color:#aaa;text-decoration:none;font-size:14px;cursor:pointer;transition:color .2s;}
+  .nav-links a:hover,.nav-links a.active{color:#fff;}
+  .search-box{display:flex;align-items:center;gap:8px;background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:8px 16px;}
+  .search-box input{background:transparent;border:none;color:#fff;font-size:14px;outline:none;width:180px;}
+
+  /* HERO */
+  .hero{min-height:500px;display:flex;align-items:center;padding:60px 40px;position:relative;overflow:hidden;}
+  .hero-bg{position:absolute;inset:0;background:linear-gradient(135deg,#1a0a2e,#0d1a2e,#0d0d0d);z-index:0;}
+  .hero-content{position:relative;z-index:1;max-width:550px;}
+  .hero-badge{display:inline-block;background:#6C63FF;color:#fff;font-size:11px;padding:4px 12px;border-radius:4px;margin-bottom:16px;letter-spacing:1px;}
+  .hero h1{font-size:46px;font-weight:700;line-height:1.1;margin-bottom:14px;}
+  .hero h1 span{color:#6C63FF;}
+  .hero p{color:#aaa;font-size:15px;line-height:1.7;margin-bottom:28px;}
+  .hero-btns{display:flex;gap:12px;}
+  .btn-primary{background:#6C63FF;color:#fff;border:none;padding:13px 30px;border-radius:8px;font-size:15px;cursor:pointer;font-weight:600;transition:opacity .2s;}
+  .btn-primary:hover{opacity:.85;}
+  .btn-secondary{background:transparent;color:#fff;border:1px solid #555;padding:13px 30px;border-radius:8px;font-size:15px;cursor:pointer;transition:border-color .2s;}
+  .btn-secondary:hover{border-color:#fff;}
+
+  /* SECTIONS */
+  .section{padding:36px 40px;}
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .section-title{font-size:20px;font-weight:600;}
+  .section-title span{color:#6C63FF;}
+  .see-all{color:#6C63FF;font-size:13px;cursor:pointer;text-decoration:none;}
+
+  /* CARDS */
+  .cards-row{display:flex;gap:14px;overflow-x:auto;padding-bottom:10px;}
+  .cards-row::-webkit-scrollbar{height:4px;}
+  .card{min-width:150px;cursor:pointer;flex-shrink:0;transition:transform .2s;}
+  .card:hover{transform:scale(1.05);}
+  .card-poster{width:150px;height:225px;border-radius:10px;object-fit:cover;background:#1a1a1a;}
+  .card-title{font-size:13px;font-weight:500;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
+  .card-info{display:flex;align-items:center;gap:6px;margin-top:4px;}
+  .card-year{font-size:11px;color:#aaa;}
+  .card-rating{font-size:11px;color:#6C63FF;background:#6C63FF22;padding:2px 6px;border-radius:4px;}
+
+  /* MODAL PLAYER */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:#111;border-radius:16px;width:90%;max-width:960px;overflow:hidden;position:relative;}
+  .modal-close{position:absolute;top:14px;right:18px;background:transparent;border:none;color:#fff;font-size:24px;cursor:pointer;z-index:10;}
+  .player-frame{width:100%;height:520px;border:none;display:block;}
+  .modal-info{padding:20px 24px;}
+  .modal-title{font-size:22px;font-weight:700;margin-bottom:6px;}
+  .modal-meta{display:flex;gap:12px;margin-bottom:12px;}
+  .modal-meta span{font-size:13px;color:#aaa;}
+  .modal-overview{font-size:14px;color:#bbb;line-height:1.6;}
+
+  /* GENRES */
+  .genres{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px;padding:0 40px;}
+  .genre-btn{background:#1a1a1a;border:1px solid #333;color:#aaa;padding:8px 18px;border-radius:20px;font-size:13px;cursor:pointer;transition:all .2s;}
+  .genre-btn:hover,.genre-btn.active{background:#6C63FF;border-color:#6C63FF;color:#fff;}
+
+  /* LOADING */
+  .loading{text-align:center;padding:40px;color:#555;}
+  .spinner{width:36px;height:36px;border:3px solid #333;border-top:3px solid #6C63FF;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  /* FOOTER */
+  footer{text-align:center;padding:28px;color:#444;font-size:13px;border-top:1px solid #1a1a1a;margin-top:20px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="showHome()">
+    <div class="logo-icon">N</div>
+    <div class="logo-text">NEXUS</div>
+  </div>
+  <div class="nav-links">
+    <a class="active" onclick="showHome();setActive(this)">Accueil</a>
+    <a onclick="loadCategory('film');setActive(this)">Films</a>
+    <a onclick="loadCategory('tv');setActive(this)">Séries</a>
+    <a onclick="loadCategory('anime');setActive(this)">Animés</a>
+  </div>
+  <div class="search-box">
+    <span>🔍</span>
+    <input type="text" placeholder="Rechercher..." id="searchInput" oninput="handleSearch(this.value)">
+  </div>
+</nav>
+
+<div id="app">
+  <div class="loading"><div class="spinner"></div>Chargement...</div>
+</div>
+
+<!-- MODAL PLAYER -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <iframe class="player-frame" id="playerFrame" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    <div class="modal-info">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-meta" id="modalMeta"></div>
+      <div class="modal-overview" id="modalOverview"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_KEY = '37aabfce2cfb59510690b925eb0f4ed7';
+const BASE = 'https://api.themoviedb.org/3';
+const IMG = 'https://image.tmdb.org/t/p/w342';
+const LANG = 'fr-FR';
+
+function setActive(el){document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));el.classList.add('active');}
+
+async function fetchTMDB(path){
+  const r=await fetch(`${BASE}${path}${path.includes('?')?'&':'?'}api_key=${API_KEY}&language=${LANG}`);
+  return r.json();
+}
+
+function cardHTML(item,type){
+  const poster=item.poster_path?`${IMG}${item.poster_path}`:'https://via.placeholder.com/150x225/1a1a1a/555?text=N';
+  const title=item.title||item.name||'';
+  const year=(item.release_date||item.first_air_date||'').slice(0,4);
+  const rating=item.vote_average?item.vote_average.toFixed(1):'';
+  return `<div class="card" onclick="openPlayer(${item.id},'${type}')">
+    <img class="card-poster" src="${poster}" alt="${title}" loading="lazy" onerror="this.src='https://via.placeholder.com/150x225/1a1a1a/555?text=N'">
+    <div class="card-title">${title}</div>
+    <div class="card-info">
+      ${year?`<span class="card-year">${year}</span>`:''}
+      ${rating?`<span class="card-rating">★ ${rating}</span>`:''}
+    </div>
+  </div>`;
+}
+
+function sectionHTML(title,items,type){
+  if(!items||!items.length)return'';
+  return`<div class="section">
+    <div class="section-header">
+      <div class="section-title">${title}</div>
+    </div>
+    <div class="cards-row">${items.map(i=>cardHTML(i,type)).join('')}</div>
+  </div>`;
+}
+
+async function showHome(){
+  document.getElementById('app').innerHTML='<div class="loading"><div class="spinner"></div>Chargement...</div>';
+  const [trending,movies,tvs,french]=await Promise.all([
+    fetchTMDB('/trending/all/week'),
+    fetchTMDB('/movie/popular'),
+    fetchTMDB('/tv/popular'),
+    fetchTMDB('/discover/movie?with_original_language=fr&sort_by=popularity.desc'),
+  ]);
+  const featured=trending.results&&trending.results[0];
+  const heroHTML=featured?`
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <div class="hero-badge">⭐ EN VEDETTE</div>
+        <h1>${(featured.title||featured.name||'').split(' ').slice(0,3).join('<br>')}</h1>
+        <p>${(featured.overview||'').slice(0,160)}...</p>
+        <div class="hero-btns">
+          <button class="btn-primary" onclick="openPlayer(${featured.id},'${featured.media_type||'movie'}')">▶ Regarder</button>
+          <button class="btn-secondary">+ Ma liste</button>
+        </div>
+      </div>
+    </div>`:'';
+  document.getElementById('app').innerHTML=heroHTML+
+    sectionHTML('🔥 Tendances <span>du moment</span>',trending.results,'movie')+
+    sectionHTML('🎬 Films <span>populaires</span>',movies.results,'movie')+
+    sectionHTML('📺 Séries <span>populaires</span>',tvs.results,'tv')+
+    sectionHTML('🇫🇷 Films <span>français</span>',french.results,'movie')+
+    '<footer>© 2026 Nexus Streaming — Tous droits réservés</footer>';
+}
+
+async function loadCategory(type){
+  document.getElementById('app').innerHTML='<div class="loading"><div class="spinner"></div>Chargement...</div>';
+  let sections='';
+  if(type==='film'){
+    const [pop,top,action,comedie]=await Promise.all([
+      fetchTMDB('/movie/popular'),
+      fetchTMDB('/movie/top_rated'),
+      fetchTMDB('/discover/movie?with_genres=28'),
+      fetchTMDB('/discover/movie?with_genres=35'),
+    ]);
+    sections=sectionHTML('🔥 Films populaires',pop.results,'movie')+
+      sectionHTML('⭐ Meilleurs films',top.results,'movie')+
+      sectionHTML('💥 Action',action.results,'movie')+
+      sectionHTML('😂 Comédie',comedie.results,'movie');
+  } else if(type==='tv'){
+    const [pop,top,drama]=await Promise.all([
+      fetchTMDB('/tv/popular'),
+      fetchTMDB('/tv/top_rated'),
+      fetchTMDB('/discover/tv?with_genres=18'),
+    ]);
+    sections=sectionHTML('🔥 Séries populaires',pop.results,'tv')+
+      sectionHTML('⭐ Meilleures séries',top.results,'tv')+
+      sectionHTML('🎭 Drames',drama.results,'tv');
+  } else if(type==='anime'){
+    const [anime,anime2]=await Promise.all([
+      fetchTMDB('/discover/tv?with_genres=16&with_origin_country=JP'),
+      fetchTMDB('/discover/movie?with_genres=16&with_origin_country=JP'),
+    ]);
+    sections=sectionHTML('🎌 Séries animées',anime.results,'tv')+
+      sectionHTML('🎌 Films animés',anime2.results,'movie');
+  }
+  document.getElementById('app').innerHTML=sections+'<footer>© 2026 Nexus Streaming — Tous droits réservés</footer>';
+}
+
+let searchTimeout;
+function handleSearch(q){
+  clearTimeout(searchTimeout);
+  if(!q.trim()){showHome();return;}
+  searchTimeout=setTimeout(async()=>{
+    document.getElementById('app').innerHTML='<div class="loading"><div class="spinner"></div>Recherche...</div>';
+    const [movies,tvs]=await Promise.all([
+      fetchTMDB(`/search/movie?query=${encodeURIComponent(q)}`),
+      fetchTMDB(`/search/tv?query=${encodeURIComponent(q)}`),
+    ]);
+    document.getElementById('app').innerHTML=
+      sectionHTML('🎬 Films trouvés',movies.results,'movie')+
+      sectionHTML('📺 Séries trouvées',tvs.results,'tv')+
+      '<footer>© 2026 Nexus Streaming — Tous droits réservés</footer>';
+  },500);
+}
+
+async function openPlayer(id,type){
+  const overlay=document.getElementById('modalOverlay');
+  const frame=document.getElementById('playerFrame');
+  overlay.classList.add('open');
+  const mediaType=type==='tv'?'tv':'movie';
+  frame.src=`https://vidsrc.to/embed/${mediaType}/${id}`;
+  const details=await fetchTMDB(`/${mediaType}/${id}`);
+  document.getElementById('modalTitle').textContent=details.title||details.name||'';
+  document.getElementById('modalMeta').innerHTML=`
+    <span>⭐ ${details.vote_average?details.vote_average.toFixed(1):'-'}</span>
+    <span>${(details.release_date||details.first_air_date||'').slice(0,4)}</span>
+    <span>${details.runtime||details.episode_run_time?.[0]||'-'} min</span>
+    <span>${details.genres?.map(g=>g.name).join(', ')||''}`;
+  document.getElementById('modalOverview').textContent=details.overview||'Aucune description disponible.';
+}
+
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('modalOverlay'))return;
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.getElementById('playerFrame').src='';
+}
+
+showHome();
+</script>
+</body>
+</html>
