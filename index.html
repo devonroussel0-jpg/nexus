@@ -240,7 +240,7 @@ async function openPlayer(id,type){
   const frame=document.getElementById('playerFrame');
   overlay.classList.add('open');
   const mediaType=type==='tv'?'tv':'movie';
-  window.open(`https://vidsrc.to/embed/${mediaType}/${id}`, '_blank');
+  window.open(`https://autoembed.cc/embed/${mediaType}/${id}`, '_blank');
   const details=await fetchTMDB(`/${mediaType}/${id}`);
   document.getElementById('modalTitle').textContent=details.title||details.name||'';
   document.getElementById('modalMeta').innerHTML=`
