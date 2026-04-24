@@ -1,23 +1,16 @@
-FROM python:3.11-slim
+FROM nginx:alpine
 
-WORKDIR /app
+# Copie l'interface Stremio Web
+RUN apk add --no-cache curl git
 
-# Installation des paquets système
-RUN apt-get update && apt-get install -y \
-    curl \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+RUN git clone --depth 1 https://github.com/Stremio/stremio-web.git /usr/share/nginx/html
 
-# Installation de Stremio Web + configuration FR
-RUN git clone --depth 1 https://github.com/Stremio/stremio-web.git /app/stremio-web
+# Configuration personnalisée Nexus FR
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY start.sh /start.sh
 
-# Installation des dépendances
-RUN curl -fsSL https://github.com/muhammederkan/mediafusion/releases/latest/download/mediafusion-linux-amd64 > /usr/local/bin/mediafusion && \
-    chmod +x /usr/local/bin/mediafusion
-
-COPY start.sh .
-RUN chmod +x start.sh
+RUN chmod +x /start.sh
 
 EXPOSE 8080
 
-CMD ["./start.sh"]
+CMD ["/start.sh"]
