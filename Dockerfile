@@ -8,8 +8,8 @@ WORKDIR /app
 
 # Renommer Stremio en Nexus
 RUN find /app/src -type f -name "*.js" -o -name "*.jsx" | xargs sed -i 's/Stremio/Nexus/g'
-RUN sed -i 's/Stremio/Nexus/g' /app/public/index.html
-RUN sed -i 's/stremio/nexus/g' /app/public/index.html
+RUN find /app -name "index.html" -exec sed -i 's/Stremio/Nexus/g' {} + || true
+RUN find /app -name "index.html" -exec sed -i 's/stremio/nexus/g' {} + || true
 
 # Remplacer le logo (si tu as ajouté logo.png dans ton repo)
 COPY logo.png /app/public/images/logo.png
