@@ -3,7 +3,7 @@ FROM nginx:alpine
 # Copie l'interface Stremio Web
 RUN apk add --no-cache curl git
 
-RUN git clone --depth 1 https://github.com/Stremio/stremio-web.git /usr/share/nginx/html
+RUN rm -rf /usr/share/nginx/html/* && git clone --depth 1 https://github.com/Stremio/stremio-web.git /usr/share/nginx/html
 
 # Configuration personnalisée Nexus FR
 COPY nginx.conf /etc/nginx/conf.d/default.conf
