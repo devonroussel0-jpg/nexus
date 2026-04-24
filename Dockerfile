@@ -1,16 +1,22 @@
+# Étape 1 : Build de stremio-web
+FROM node:18-alpine AS builder
+
+RUN apk add --no-cache git
+RUN git clone --depth 1 https://github.com/Stremio/stremio-web.git /app
+
+WORKDIR /app
+RUN npm install
+RUN npm run build
+
+# Étape 2 : Servir avec nginx
 FROM nginx:alpine
 
-# Copie l'interface Stremio Web
-RUN apk add --no-cache curl git
+# Copie les fichiers buildés
+COPY --from=builder /app/build /usr/share/nginx/html
 
-RUN rm -rf /usr/share/nginx/html/* && git clone --depth 1 https://github.com/Stremio/stremio-web.git /usr/share/nginx/html
-
-# Configuration personnalisée Nexus FR
+# Config nginx personnalisée
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY start.sh /start.sh
-
-RUN chmod +x /start.sh
 
 EXPOSE 8080
 
-CMD ["/start.sh"]
+CMD ["nginx", "-g", "daemon off;"]
